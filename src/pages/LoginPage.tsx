@@ -142,7 +142,7 @@ export function LoginPage() {
         </CardContent>
         </Card>
 
-        <p className="mt-6 text-center text-xs text-white/45">APIIS Volunteer Management</p>
+        <p className="mt-6 text-center text-xs text-white/45">APIIS OBS Volunteer</p>
       </div>
     </div>
   )
