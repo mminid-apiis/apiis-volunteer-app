@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useAssignmentHistory } from '@/hooks/use-assignments'
+import { cohortAccent } from '@/lib/cohort-accent'
 import { Spinner } from '@/components/spinner'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -67,15 +68,23 @@ export function AssignmentHistory() {
                   <TableCell className="tabular-nums whitespace-nowrap">
                     {r.week_start_date}
                   </TableCell>
-                  <TableCell>{r.class_name ?? '—'}</TableCell>
+                  <TableCell>
+                    {r.class_name ? (
+                      <Badge variant="outline" className={`font-normal ${cohortAccent(r.class_name).badge}`}>
+                        {r.class_name}
+                      </Badge>
+                    ) : (
+                      '—'
+                    )}
+                  </TableCell>
                   <TableCell>{r.group_name ?? '—'}</TableCell>
                   <TableCell>
                     <Badge
                       variant="secondary"
                       className={
                         r.source === 'coverage'
-                          ? 'bg-green-100 font-normal text-green-900 dark:bg-green-900/40 dark:text-green-100'
-                          : 'bg-blue-700 font-normal text-white'
+                          ? 'bg-cyan-100 font-normal text-cyan-900 dark:bg-cyan-900/40 dark:text-cyan-100'
+                          : 'bg-rose-600 font-normal text-white'
                       }
                     >
                       {r.source === 'coverage' ? 'Coverage' : 'Admin-assigned'}

@@ -11,9 +11,11 @@ import {
   weekLabel,
   weeksForCurriculum,
 } from '@/lib/calendar'
-import { todaySG } from '@/lib/date'
+import { todayWIB } from '@/lib/date'
+import { cohortAccent } from '@/lib/cohort-accent'
 import { AttendanceForm } from '@/components/attendance-form'
 import { FullPageSpinner } from '@/components/full-page-spinner'
+import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -36,7 +38,7 @@ export function GroupAttendancePage() {
   const group = groupQ.data
   const className = group?.cohort?.name ?? null
   const curriculum = curriculumForClass(className)
-  const today = todaySG()
+  const today = todayWIB()
   // 当前周(非超管只能记当前周)；周二班的日期 = 周一锚点 +1 天；无法识别课程时退回普通日期选择
   const curWeek = curriculum ? currentWeek(curriculum, today) : null
   const defaultDate =
@@ -67,8 +69,12 @@ export function GroupAttendancePage() {
         </Link>
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{group.name}</h1>
-          <p className="text-muted-foreground mt-1 flex flex-wrap items-center gap-1 text-sm">
-            <span>{group.cohort?.name}</span>
+          <p className="text-muted-foreground mt-1 flex flex-wrap items-center gap-2 text-sm">
+            {group.cohort?.name && (
+              <Badge variant="outline" className={`font-normal ${cohortAccent(group.cohort.name).badge}`}>
+                {group.cohort.name}
+              </Badge>
+            )}
             {group.meeting_day && <span>· {group.meeting_day}</span>}
             {group.zoom_link && (
               <>

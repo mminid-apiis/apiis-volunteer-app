@@ -120,16 +120,17 @@ export function GroupAssignmentCard({
             <span className="text-muted-foreground text-sm">No volunteers assigned</span>
           ) : (
             groupAssignments.map((a) => {
-              // 三种来源:补位(coverage_week 非空)→ 浅绿;管理员手动指派(source=manual)→ 深蓝;
+              // 三种来源:补位(coverage_week 非空)→ 浅青;管理员手动指派(source=manual)→ 玫红;
               // 导入名单/本来的负责人 → 保持原样(灰)。补位颜色优先级最高。
+              // (刻意避开蓝/绿/紫/黄——那几色已用作班级强调色,免得和班级分区混淆)
               const isCoverage = a.coverage_week != null
               const isManual = !isCoverage && a.source === 'manual'
-              // 补位/管理员指派的人,名字后标其原属组(如 "(7L-G7)")
+              // 补位/管理员指派的人,名字后标其原属组(如 "(2P-G7)")
               const orig = isCoverage || isManual ? originals.get(a.volunteer_id) : undefined
               const tint = isCoverage
-                ? ' bg-green-100 text-green-900 dark:bg-green-900/40 dark:text-green-100'
+                ? ' bg-cyan-100 text-cyan-900 dark:bg-cyan-900/40 dark:text-cyan-100'
                 : isManual
-                  ? ' bg-blue-700 text-white dark:bg-blue-700'
+                  ? ' bg-rose-600 text-white dark:bg-rose-600'
                   : ''
               return (
                 <Badge

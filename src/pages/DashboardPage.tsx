@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Video } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
 import { useMyGroups } from '@/hooks/use-groups'
+import { cohortAccent } from '@/lib/cohort-accent'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -38,7 +39,10 @@ export function DashboardPage() {
                 <CardTitle className="flex items-center justify-between gap-2 text-base">
                   <span>{g.name}</span>
                   {g.class_name && (
-                    <Badge variant="outline" className="shrink-0 font-normal">
+                    <Badge
+                      variant="outline"
+                      className={`shrink-0 font-normal ${cohortAccent(g.class_name).badge}`}
+                    >
                       {g.class_name}
                     </Badge>
                   )}

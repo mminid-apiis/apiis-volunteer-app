@@ -48,6 +48,6 @@ const pad = (n: number) => String(n).padStart(2, '0')
 
 /** 把截止瞬间格式化成 UTC+7 墙上时间标签，如 "Sat 06-27 19:59"。 */
 export function formatDeadline(deadlineMs: number): string {
-  const d = new Date(deadlineMs + TZ * 3600 * 1000) // 偏到 UTC+8 后用 UTC 取值
+  const d = new Date(deadlineMs + TZ * 3600 * 1000) // 偏到 UTC+7 后用 UTC 取值
   return `${DAYS[d.getUTCDay()]} ${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`
 }

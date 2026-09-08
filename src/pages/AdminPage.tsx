@@ -144,10 +144,10 @@ function AssignmentsTab({ classFilter }: { classFilter: string }) {
           <span className="bg-secondary inline-block size-3 rounded-full" /> Roster (original)
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block size-3 rounded-full bg-blue-700" /> Admin-assigned
+          <span className="inline-block size-3 rounded-full bg-rose-600" /> Admin-assigned
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block size-3 rounded-full border bg-green-100" /> Coverage
+          <span className="inline-block size-3 rounded-full border bg-cyan-100" /> Coverage
         </span>
       </div>
       <p className="text-muted-foreground text-xs">
@@ -317,7 +317,13 @@ export function AdminPage() {
             <SelectItem value="all">All classes</SelectItem>
             {classes.map((c) => (
               <SelectItem key={c.id} value={c.id}>
-                {c.name}
+                <span className="flex items-center gap-2">
+                  <span
+                    className={`inline-block size-2.5 rounded-full ${cohortAccent(c.name).bar}`}
+                    aria-hidden
+                  />
+                  {c.name}
+                </span>
               </SelectItem>
             ))}
           </SelectContent>
