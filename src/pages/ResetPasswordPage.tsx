@@ -53,7 +53,7 @@ export function ResetPasswordPage() {
     <div className="relative flex min-h-svh items-center justify-center overflow-hidden bg-gradient-to-br from-[#0d2438] via-[#0c3c60] to-[#0a2c49] p-4">
       <div className="relative z-10 w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center">
-          <ApiisLogo className="h-20 w-auto" />
+          <ApiisLogo className="h-32 w-auto" />
         </div>
         <Card className="w-full shadow-xl">
           <CardHeader className="text-center">

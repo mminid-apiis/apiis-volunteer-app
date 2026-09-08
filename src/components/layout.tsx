@@ -31,7 +31,7 @@ export function Layout() {
       <header className="bg-background/80 supports-[backdrop-filter]:bg-background/65 sticky top-0 z-40 border-b backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5" aria-label="APIIS Volunteers — home">
-            <ApiisLogo className="h-9 w-auto" />
+            <ApiisLogo className="h-11 w-auto" />
             <span aria-hidden className="bg-border hidden h-5 w-px sm:block" />
             <span className="text-muted-foreground hidden text-sm font-medium sm:inline">Volunteers</span>
           </Link>

@@ -78,7 +78,7 @@ export function LoginPage() {
 
       <div className="relative z-10 w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center text-center">
-          <ApiisLogo className="h-24 w-auto" />
+          <ApiisLogo className="h-36 w-auto" />
           <p className="mt-4 text-sm text-white/70">
             21st Century Training. For Christians. For Free
           </p>
