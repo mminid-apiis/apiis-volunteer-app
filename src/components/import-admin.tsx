@@ -143,7 +143,7 @@ export function ImportStudents() {
           One row per student: <code>Name, Class, Group, Email</code> (keep a header row — columns are
           matched by name, so order doesn&apos;t matter). <b>Email is required</b> and is the unique
           key — re-importing the same email updates that student. Class can be the full name or a
-          unique part (e.g. <code>6P</code>); Group can be <code>Group 5</code> or <code>5</code>.
+          unique part (e.g. <code>Pastoral</code>); Group can be <code>Group 5</code> or <code>5</code>.
         </p>
         {classes.length > 0 && (
           <p className="text-muted-foreground text-xs">
@@ -156,7 +156,7 @@ export function ImportStudents() {
         </div>
         <Textarea
           rows={7}
-          placeholder={'Name, Class, Group, Email\nAlice Wong, MMin 6P Monday Morning, 1, alice@example.com\nBob Lee, 6L, 12, bob@example.com'}
+          placeholder={'Name, Class, Group, Email\nAlice Wong, MMin 2 Leadership, 1, alice@example.com\nBob Lee, Pastoral, 12, bob@example.com'}
           value={csv}
           onChange={(e) => setCsv(e.target.value)}
           className="font-mono text-xs"
@@ -249,7 +249,7 @@ export function ImportVolunteers() {
           if (aErr) errors.push(`${email}: extra groups — ${aErr.message}`)
         }
         // 幂等(按班级):只清理该志愿者「在本次导入涉及的班级内、且不在本次名单里」的旧永久分配。
-        // 例如导入他在 6P 的组,不会动他在 6L 等其它班级的组;补位(coverage)分配也不受影响。
+        // 例如导入他在 Leadership 的组,不会动他在 Pastoral 等其它班级的组;补位(coverage)分配也不受影响。
         if (uid && groupIds.length > 0) {
           const importedSet = new Set(groupIds)
           // 本次导入涉及到的班级(cohort)
@@ -306,7 +306,7 @@ export function ImportVolunteers() {
         </div>
         <Textarea
           rows={7}
-          placeholder={'Name, Email, Class, Group\nAlice Wong, alice@example.com, MMin 6P Monday Morning, 1\nBob Lee, bob@example.com, MMin 6L Tuesday Night, 12'}
+          placeholder={'Name, Email, Class, Group\nAlice Wong, alice@example.com, MMin 2 Leadership, 1\nBob Lee, bob@example.com, MMin 2 Pastoral, 12'}
           value={csv}
           onChange={(e) => setCsv(e.target.value)}
           className="font-mono text-xs"

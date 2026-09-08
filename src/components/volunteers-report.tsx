@@ -82,7 +82,8 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
       const g = groupById.get(a.group_id)
       if (!g) continue
       const cls = g.cohort?.name ?? ''
-      const short = cls.replace(/^MMin\s+/i, '').split(/\s+/)[0] || cls
+      const clsParts = cls.replace(/^MMin\s+/i, '').split(/\s+/)
+      const short = clsParts.length > 1 ? `${clsParts[0]}${clsParts[1][0]}` : clsParts[0] || cls
       const arr = map.get(a.volunteer_id) ?? []
       arr.push({
         id: a.id,

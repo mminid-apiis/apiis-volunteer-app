@@ -28,10 +28,11 @@ import {
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-// 组短码,如 MMin 7L Monday Night + Group 7 → "7L-G7"
+// 组短码,如 MMin 2 Pastoral + Group 7 → "2P-G7"
 function groupCode(g: { name: string; cohort: { name: string } | null }): string {
   const cls = g.cohort?.name ?? ''
-  const sec = cls.replace(/^MMin\s+/i, '').split(/\s+/)[0] || cls
+  const parts = cls.replace(/^MMin\s+/i, '').split(/\s+/)
+  const sec = parts.length > 1 ? `${parts[0]}${parts[1][0]}` : parts[0] || cls
   const num = g.name.replace(/^group\s*/i, '')
   return `${sec}-G${num}`
 }
