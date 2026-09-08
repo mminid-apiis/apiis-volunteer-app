@@ -43,7 +43,7 @@ export function isPast(deadlineMs: number): boolean {
   return Date.now() > deadlineMs
 }
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const DAYS = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
 const pad = (n: number) => String(n).padStart(2, '0')
 
 /** 把截止瞬间格式化成 UTC+7 墙上时间标签，如 "Sat 06-27 19:59"。 */

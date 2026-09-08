@@ -30,20 +30,20 @@ export function Layout() {
     <div className="flex min-h-svh flex-col">
       <header className="bg-background/80 supports-[backdrop-filter]:bg-background/65 sticky top-0 z-40 border-b backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
-          <Link to="/" className="flex items-center gap-2.5" aria-label="APIIS Volunteers — home">
+          <Link to="/" className="flex items-center gap-2.5" aria-label="APIIS Volunteers — beranda">
             <ApiisLogo className="h-11 w-auto" />
             <span aria-hidden className="bg-border hidden h-5 w-px sm:block" />
-            <span className="text-muted-foreground hidden text-sm font-medium sm:inline">Volunteers</span>
+            <span className="text-muted-foreground hidden text-sm font-medium sm:inline">Volunteer</span>
           </Link>
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/feedback" aria-label="Send feedback">
+              <Link to="/feedback" aria-label="Kirim masukan">
                 <MessageSquare className="size-4" />
-                <span className="hidden sm:inline">Feedback</span>
+                <span className="hidden sm:inline">Masukan</span>
               </Link>
             </Button>
             <Button variant="ghost" size="icon" asChild className="relative">
-              <Link to="/notifications" aria-label="Notifications">
+              <Link to="/notifications" aria-label="Notifikasi">
                 <Bell className="size-5" />
                 {unread > 0 && (
                   <span className="bg-primary text-primary-foreground absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full text-[10px] leading-none">
@@ -68,9 +68,9 @@ export function Layout() {
                 <DropdownMenuLabel className="truncate">{profile?.full_name}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/account">Account</Link>
+                  <Link to="/account">Akun</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => void signOut()}>Sign out</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => void signOut()}>Keluar</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

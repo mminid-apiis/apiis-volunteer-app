@@ -60,20 +60,20 @@ function AddGroupButton({
         name,
         meetingDay: existingGroups[0]?.meeting_day ?? null,
       })
-      toast.success(`${name} added`)
+      toast.success(`${name} ditambahkan`)
     } catch (e) {
-      toast.error(`Failed: ${(e as Error).message}`)
+      toast.error(`Gagal: ${(e as Error).message}`)
     }
   }
 
   return (
     <Button size="sm" variant="outline" onClick={() => void onAdd()} disabled={create.isPending}>
-      <Plus className="size-4" /> Add group
+      <Plus className="size-4" /> Tambah grup
     </Button>
   )
 }
 
-// 分区表头：色条 + 班级名 + 数量,可选带右侧操作按钮(如 Add group)。
+// 分区表头：色条 + 班级名 + 数量,可选带右侧操作按钮(如 Tambah grup)。
 function CohortSectionHeader({
   cohortName,
   count,
@@ -92,7 +92,6 @@ function CohortSectionHeader({
       <h3 className={`text-sm font-semibold ${accent.text}`}>{cohortName}</h3>
       <span className="text-muted-foreground text-xs">
         {count} {noun}
-        {count === 1 ? '' : 's'}
       </span>
       {action && <span className="ml-auto">{action}</span>}
     </div>
@@ -106,7 +105,7 @@ function AssignmentsTab({ classFilter }: { classFilter: string }) {
   const marksQ = useGroupCheckMarks()
 
   if (groupsQ.isLoading || usersQ.isLoading || assignmentsQ.isLoading) {
-    return <Spinner label="Loading groups & assignments…" />
+    return <Spinner label="Memuat grup & penugasan…" />
   }
   const users = usersQ.data ?? []
   const assignments = assignmentsQ.data ?? []
@@ -132,7 +131,7 @@ function AssignmentsTab({ classFilter }: { classFilter: string }) {
   const groups = allGroups.filter((g) => classFilter === 'all' || g.cohort_id === classFilter)
 
   if (groups.length === 0) {
-    return <p className="text-muted-foreground text-sm">No groups.</p>
+    return <p className="text-muted-foreground text-sm">Belum ada grup.</p>
   }
 
   const sections = groupByCohort(groups)
@@ -141,25 +140,25 @@ function AssignmentsTab({ classFilter }: { classFilter: string }) {
     <div className="flex flex-col gap-5">
       <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
         <span className="flex items-center gap-1.5">
-          <span className="bg-secondary inline-block size-3 rounded-full" /> Roster (original)
+          <span className="bg-secondary inline-block size-3 rounded-full" /> Roster (asli)
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block size-3 rounded-full bg-rose-600" /> Admin-assigned
+          <span className="inline-block size-3 rounded-full bg-rose-600" /> Ditugaskan admin
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block size-3 rounded-full border bg-cyan-100" /> Coverage
         </span>
       </div>
       <p className="text-muted-foreground text-xs">
-        “Present / Absent” is a temporary note for tracking whether the original volunteer showed up —
-        it isn’t saved to attendance and is cleared every Wednesday.
+        "Hadir / Tidak hadir" adalah catatan sementara untuk melacak apakah volunteer aslinya hadir — ini
+        tidak tersimpan ke data kehadiran dan otomatis dibersihkan tiap hari Rabu.
       </p>
       {sections.map((section) => (
         <div key={section.cohortId} className="flex flex-col gap-3">
           <CohortSectionHeader
             cohortName={section.cohortName}
             count={section.items.length}
-            noun="group"
+            noun="grup"
             action={<AddGroupButton cohortId={section.cohortId} existingGroups={section.items} />}
           />
           <div className="grid gap-4 md:grid-cols-2">
@@ -189,14 +188,14 @@ function RecordsTab({ classFilter }: { classFilter: string }) {
   const sections = groupByCohort(groups)
 
   if (groups.length === 0) {
-    return <p className="text-muted-foreground text-sm">No groups.</p>
+    return <p className="text-muted-foreground text-sm">Belum ada grup.</p>
   }
 
   return (
     <div className="flex flex-col gap-5">
       {sections.map((section) => (
         <div key={section.cohortId} className="flex flex-col gap-3">
-          <CohortSectionHeader cohortName={section.cohortName} count={section.items.length} noun="group" />
+          <CohortSectionHeader cohortName={section.cohortName} count={section.items.length} noun="grup" />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {section.items.map((g) => (
               <Card key={g.id}>
@@ -205,7 +204,7 @@ function RecordsTab({ classFilter }: { classFilter: string }) {
                 </CardHeader>
                 <CardContent>
                   <Button asChild size="sm" variant="secondary">
-                    <Link to={`/groups/${g.id}`}>Open attendance</Link>
+                    <Link to={`/groups/${g.id}`}>Buka kehadiran</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -223,7 +222,7 @@ function FeedbackTab() {
   const del = useDeleteFeedback()
   if (isLoading) return <Spinner />
   if (!items || items.length === 0)
-    return <p className="text-muted-foreground text-sm">No feedback yet.</p>
+    return <p className="text-muted-foreground text-sm">Belum ada masukan.</p>
 
   // 未解决在前,其次按时间(新 → 旧)
   const sorted = [...items].sort(
@@ -234,8 +233,8 @@ function FeedbackTab() {
     setResolved.mutate(
       { id: f.id, resolved: !f.resolved },
       {
-        onSuccess: () => toast.success(f.resolved ? 'Reopened' : 'Marked resolved'),
-        onError: (e) => toast.error(`Failed: ${(e as Error).message}`),
+        onSuccess: () => toast.success(f.resolved ? 'Dibuka kembali' : 'Ditandai selesai'),
+        onError: (e) => toast.error(`Gagal: ${(e as Error).message}`),
       },
     )
   }
@@ -243,13 +242,13 @@ function FeedbackTab() {
   function onDelete(f: Feedback) {
     if (
       !window.confirm(
-        `Delete this feedback from ${f.full_name || 'Unknown'}? This permanently removes it.`,
+        `Hapus masukan dari ${f.full_name || 'Tidak diketahui'}? Ini akan menghapusnya secara permanen.`,
       )
     )
       return
     del.mutate(f.id, {
-      onSuccess: () => toast.success('Feedback deleted'),
-      onError: (e) => toast.error(`Failed: ${(e as Error).message}`),
+      onSuccess: () => toast.success('Masukan dihapus'),
+      onError: (e) => toast.error(`Gagal: ${(e as Error).message}`),
     })
   }
 
@@ -259,14 +258,14 @@ function FeedbackTab() {
         <div key={f.id} className={`rounded-md border p-3 ${f.resolved ? 'bg-muted/40' : ''}`}>
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <p className="font-medium">{f.full_name || 'Unknown'}</p>
+              <p className="font-medium">{f.full_name || 'Tidak diketahui'}</p>
               {f.resolved && (
                 <Badge
                   variant="secondary"
                   className="gap-1 font-normal"
-                  title={f.resolved_at ? `Resolved ${new Date(f.resolved_at).toLocaleString()}` : undefined}
+                  title={f.resolved_at ? `Selesai ${new Date(f.resolved_at).toLocaleString()}` : undefined}
                 >
-                  <Check className="size-3" /> Resolved
+                  <Check className="size-3" /> Selesai
                 </Badge>
               )}
             </div>
@@ -282,7 +281,7 @@ function FeedbackTab() {
               disabled={setResolved.isPending}
               onClick={() => toggle(f)}
             >
-              {f.resolved ? 'Reopen' : 'Mark resolved'}
+              {f.resolved ? 'Buka kembali' : 'Tandai selesai'}
             </Button>
             <Button
               size="sm"
@@ -291,7 +290,7 @@ function FeedbackTab() {
               disabled={del.isPending}
               onClick={() => onDelete(f)}
             >
-              <Trash2 className="size-3.5" /> Delete
+              <Trash2 className="size-3.5" /> Hapus
             </Button>
           </div>
         </div>
@@ -314,7 +313,7 @@ export function AdminPage() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All classes</SelectItem>
+            <SelectItem value="all">Semua kelas</SelectItem>
             {classes.map((c) => (
               <SelectItem key={c.id} value={c.id}>
                 <span className="flex items-center gap-2">
@@ -332,13 +331,13 @@ export function AdminPage() {
 
       <Tabs defaultValue="assignments">
         <TabsList>
-          <TabsTrigger value="assignments">Groups &amp; Assignments</TabsTrigger>
-          <TabsTrigger value="records">Records</TabsTrigger>
-          <TabsTrigger value="students">Students</TabsTrigger>
-          <TabsTrigger value="volunteers">Volunteers</TabsTrigger>
-          <TabsTrigger value="scheduling">Scheduling</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
-          <TabsTrigger value="feedback">Feedback</TabsTrigger>
+          <TabsTrigger value="assignments">Grup &amp; Penugasan</TabsTrigger>
+          <TabsTrigger value="records">Rekap</TabsTrigger>
+          <TabsTrigger value="students">Siswa</TabsTrigger>
+          <TabsTrigger value="volunteers">Volunteer</TabsTrigger>
+          <TabsTrigger value="scheduling">Penjadwalan</TabsTrigger>
+          <TabsTrigger value="history">Riwayat</TabsTrigger>
+          <TabsTrigger value="feedback">Masukan</TabsTrigger>
         </TabsList>
         <TabsContent value="assignments" className="mt-4">
           <AssignmentsTab classFilter={classFilter} />

@@ -72,7 +72,7 @@ export function StudentsReport({ classFilter }: { classFilter: string }) {
         const wk = cur ? weekForDate(cur, dateISO) : null
         const col: WeekColumn =
           wk !== null
-            ? { key: `w${wk}`, label: `Wk ${wk}`, title: `Week ${wk} · ${dateISO}`, sort: wk }
+            ? { key: `w${wk}`, label: `Mg ${wk}`, title: `Minggu ${wk} · ${dateISO}`, sort: wk }
             : {
                 key: `d${dateISO}`,
                 label: dateISO.slice(5),
@@ -95,20 +95,20 @@ export function StudentsReport({ classFilter }: { classFilter: string }) {
         classId: classFilter === 'all' ? undefined : classFilter,
         fileName: 'students-report.xlsx',
       })
-      toast.success(`Exported ${n} student(s) across all weeks`)
+      toast.success(`Berhasil ekspor ${n} siswa untuk semua minggu`)
     } catch (e) {
-      toast.error(`Export failed: ${(e as Error).message}`)
+      toast.error(`Ekspor gagal: ${(e as Error).message}`)
     } finally {
       setExporting(false)
     }
   }
 
   function onDelete(s: { id: string; full_name: string }) {
-    if (!window.confirm(`Delete student "${s.full_name}"? This also removes their attendance records.`))
+    if (!window.confirm(`Hapus siswa "${s.full_name}"? Ini juga menghapus catatan kehadirannya.`))
       return
     del.mutate(s.id, {
-      onSuccess: () => toast.success('Student deleted'),
-      onError: (e) => toast.error(`Failed: ${(e as Error).message}`),
+      onSuccess: () => toast.success('Siswa dihapus'),
+      onError: (e) => toast.error(`Gagal: ${(e as Error).message}`),
     })
   }
 
@@ -124,10 +124,10 @@ export function StudentsReport({ classFilter }: { classFilter: string }) {
       )}
       <div className="flex flex-wrap items-center justify-between gap-2">
         {isAll ? (
-          <p className="text-muted-foreground text-sm">Select a class above to view attendance and export.</p>
+          <p className="text-muted-foreground text-sm">Pilih kelas di atas untuk melihat kehadiran dan ekspor.</p>
         ) : (
           <Input
-            placeholder="Search students…"
+            placeholder="Cari siswa…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="max-w-xs"
@@ -144,7 +144,7 @@ export function StudentsReport({ classFilter }: { classFilter: string }) {
           )}
           {!isAll && (
             <Button variant="outline" onClick={() => void onExport()} disabled={exporting}>
-              <Download className="size-4" /> {exporting ? 'Exporting…' : 'Export Excel'}
+              <Download className="size-4" /> {exporting ? 'Mengekspor…' : 'Ekspor Excel'}
             </Button>
           )}
         </div>
@@ -154,23 +154,23 @@ export function StudentsReport({ classFilter }: { classFilter: string }) {
 
       {isAll ? (
         <p className="text-muted-foreground rounded-md border border-dashed p-8 text-center text-sm">
-          Choose a class from the filter above to see its per-week attendance matrix and export it to
-          Excel. The matrix is per class — each class has its own weekly calendar, so weeks only line up
-          within a single class.
+          Pilih kelas dari filter di atas untuk melihat matriks kehadiran per minggu dan mengekspornya ke
+          Excel. Matriks-nya per kelas — tiap kelas punya kalender minggunya sendiri, jadi nomor minggu
+          hanya sinkron dalam satu kelas yang sama.
         </p>
       ) : reportQ.isLoading ? (
         <Spinner />
       ) : !report || report.students.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No students in this class yet.</p>
+        <p className="text-muted-foreground text-sm">Belum ada siswa di kelas ini.</p>
       ) : (
         <div className="overflow-x-auto rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="bg-background sticky left-0 whitespace-nowrap">Student</TableHead>
+                <TableHead className="bg-background sticky left-0 whitespace-nowrap">Siswa</TableHead>
                 <TableHead className="whitespace-nowrap">Email</TableHead>
-                <TableHead className="whitespace-nowrap">Class</TableHead>
-                <TableHead className="whitespace-nowrap">Group</TableHead>
+                <TableHead className="whitespace-nowrap">Kelas</TableHead>
+                <TableHead className="whitespace-nowrap">Grup</TableHead>
                 {columns.map((c) => (
                   <TableHead key={c.key} className="text-center whitespace-nowrap" title={c.title}>
                     {c.label}
@@ -185,7 +185,7 @@ export function StudentsReport({ classFilter }: { classFilter: string }) {
                     colSpan={4 + columns.length}
                     className="text-muted-foreground text-center text-sm"
                   >
-                    No matches.
+                    Tidak ada hasil.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -199,7 +199,7 @@ export function StudentsReport({ classFilter }: { classFilter: string }) {
                             type="button"
                             onClick={() => onDelete(s)}
                             className="text-muted-foreground hover:text-destructive"
-                            aria-label={`Delete ${s.full_name}`}
+                            aria-label={`Hapus ${s.full_name}`}
                           >
                             <Trash2 className="size-3.5" />
                           </button>
@@ -246,9 +246,10 @@ export function StudentsReport({ classFilter }: { classFilter: string }) {
 
       {!isAll && (
         <p className="text-muted-foreground text-xs">
-          Columns are program weeks (Wk N) — hover a column header for its date. Cells show the
-          Contribution score (0–3); ✎ = has a remark (hover to read); · = not assessed. The exported
-          Excel uses one sheet; each week spans two columns — Score and Remark.
+          Kolom adalah minggu program (Mg N) — arahkan kursor ke header kolom untuk lihat tanggalnya.
+          Sel menampilkan skor Contribution (0–3); ✎ = ada catatan (arahkan kursor untuk membaca); · =
+          belum dinilai. File Excel yang diekspor pakai satu sheet; tiap minggu terbagi dua kolom — Skor
+          dan Catatan.
         </p>
       )}
     </div>

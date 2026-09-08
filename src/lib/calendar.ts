@@ -206,9 +206,9 @@ export function weekForDate(c: Curriculum, dateISO: string): number | null {
   return DATE_TO_WEEK[c][mondayOfWeekISO(dateISO)] ?? null
 }
 
-/** 标签：week 0 显示 Orientation，其余 Week N。 */
+/** 标签：week 0 显示 Orientasi，其余 Minggu N。 */
 export function weekLabel(week: number): string {
-  return week === 0 ? 'Orientation' : `Week ${week}`
+  return week === 0 ? 'Orientasi' : `Minggu ${week}`
 }
 
 /** 当前/最近一周：日期 <= today 的最大周次（用作下拉默认值）。 */

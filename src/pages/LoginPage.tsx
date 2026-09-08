@@ -14,9 +14,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 function translateAuthError(msg: string): string {
   const m = msg.toLowerCase()
-  if (m.includes('invalid login credentials')) return 'Incorrect email or password'
-  if (m.includes('email not confirmed')) return 'Email not confirmed. Please contact an administrator.'
-  if (m.includes('rate limit')) return 'Too many attempts. Please try again later.'
+  if (m.includes('invalid login credentials')) return 'Email atau kata sandi salah'
+  if (m.includes('email not confirmed')) return 'Email belum dikonfirmasi. Silakan hubungi admin.'
+  if (m.includes('rate limit')) return 'Terlalu banyak percobaan. Silakan coba lagi nanti.'
   return msg
 }
 
@@ -47,7 +47,7 @@ export function LoginPage() {
   async function onForgot() {
     if (resetting) return
     if (!email) {
-      toast.error('Enter your email above first, then tap “Forgot password?”')
+      toast.error('Isi email di atas dulu, lalu klik "Lupa kata sandi?"')
       return
     }
     setResetting(true)
@@ -59,7 +59,7 @@ export function LoginPage() {
       toast.error(translateAuthError(error.message))
       return
     }
-    toast.success('If that email has an account, a password reset link is on its way.')
+    toast.success('Jika email tersebut terdaftar, link reset kata sandi sudah dikirim.')
   }
 
   return (
@@ -86,7 +86,7 @@ export function LoginPage() {
 
         <Card className="w-full shadow-xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Sign in</CardTitle>
+          <CardTitle className="text-xl">Masuk</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="flex flex-col gap-4">
@@ -99,11 +99,11 @@ export function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder="anda@contoh.com"
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Kata Sandi</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -118,7 +118,7 @@ export function LoginPage() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   className="text-muted-foreground hover:text-foreground absolute inset-y-0 right-0 flex items-center px-3"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
                   aria-pressed={showPassword}
                   tabIndex={-1}
                 >
@@ -132,11 +132,11 @@ export function LoginPage() {
               disabled={resetting}
               className="text-brand -mt-1 self-end text-xs hover:underline disabled:opacity-60"
             >
-              {resetting ? 'Sending reset link…' : 'Forgot password?'}
+              {resetting ? 'Mengirim link reset…' : 'Lupa kata sandi?'}
             </button>
             {error && <p className="text-destructive text-sm">{error}</p>}
             <Button type="submit" disabled={submitting} className="w-full">
-              {submitting ? 'Signing in…' : 'Sign in'}
+              {submitting ? 'Sedang masuk…' : 'Masuk'}
             </Button>
           </form>
         </CardContent>

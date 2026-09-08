@@ -30,7 +30,7 @@ export async function exportVolunteers(
   // 动态导入：xlsx 较大，仅在导出时加载。
   const XLSX = await import('xlsx')
   const aoa: (string | number)[][] = [
-    ['Name', 'Email', 'Role', 'Assigned groups', 'Sessions attended', 'Last active', 'Coverage given'],
+    ['Nama', 'Email', 'Peran', 'Grup ditugaskan', 'Sesi dihadiri', 'Terakhir aktif', 'Coverage diberikan'],
     ...rows.map((v) => [
       v.full_name,
       v.email ?? '',
@@ -43,7 +43,7 @@ export async function exportVolunteers(
   ]
   const ws = XLSX.utils.aoa_to_sheet(aoa)
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'Volunteers')
+  XLSX.utils.book_append_sheet(wb, ws, 'Volunteer')
   XLSX.writeFile(wb, fileName)
   return rows.length
 }
@@ -151,7 +151,7 @@ export async function exportStudentMatrix(opts: { classId?: string; fileName?: s
       const wk = cur ? weekForDate(cur, dateISO) : null
       const col: Col =
         wk !== null
-          ? { key: `w${wk}`, label: `Wk ${wk}`, sort: wk }
+          ? { key: `w${wk}`, label: `Mg ${wk}`, sort: wk }
           : { key: `d${dateISO}`, label: dateISO, sort: 1000 + (Date.parse(dateISO) || 0) / 8.64e7 }
       colMap.set(col.key, col)
       dest[col.key] = cell
@@ -163,12 +163,12 @@ export async function exportStudentMatrix(opts: { classId?: string; fileName?: s
   // 动态导入：xlsx 较大，仅在导出时加载。
   const XLSX = await import('xlsx')
 
-  // 两行表头：每个周占两列（Score / Remark），周作为合并的上层标题。
-  const top: (string | number)[] = ['Class', 'Group', 'Student', 'Email']
+  // 两行表头：每个周占两列（Skor / Catatan），周作为合并的上层标题。
+  const top: (string | number)[] = ['Kelas', 'Grup', 'Siswa', 'Email']
   const sub: (string | number)[] = ['', '', '', '']
   for (const c of cols) {
     top.push(c.label, '')
-    sub.push('Score', 'Remark')
+    sub.push('Skor', 'Catatan')
   }
   const aoa: (string | number)[][] = [top, sub]
   for (const s of students) {
@@ -190,7 +190,7 @@ export async function exportStudentMatrix(opts: { classId?: string; fileName?: s
   ws['!merges'] = merges
 
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'Report')
+  XLSX.utils.book_append_sheet(wb, ws, 'Laporan')
   XLSX.writeFile(wb, opts.fileName ?? 'students-report.xlsx')
   return students.length
 }

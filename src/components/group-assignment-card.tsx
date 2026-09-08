@@ -45,25 +45,25 @@ export function GroupAssignmentCard({
   const assignedIds = new Set(groupAssignments.map((a) => a.volunteer_id))
   // 可分配名单：排除 super_admin(itsupport);名字从「全部用户」解析,故升级为 admin 后仍正确显示
   const available = users.filter((u) => u.role !== 'super_admin' && !assignedIds.has(u.id))
-  const nameOf = (id: string) => users.find((u) => u.id === id)?.full_name ?? 'Unknown'
+  const nameOf = (id: string) => users.find((u) => u.id === id)?.full_name ?? 'Tidak diketahui'
 
   async function onAssign() {
     if (!selected) return
     try {
       await assign.mutateAsync({ groupId: group.id, volunteerId: selected })
       setSelected('')
-      toast.success('Volunteer assigned')
+      toast.success('Volunteer ditugaskan')
     } catch (e) {
-      toast.error(`Failed: ${(e as Error).message}`)
+      toast.error(`Gagal: ${(e as Error).message}`)
     }
   }
 
   async function onRemove(a: Assignment) {
     try {
       await unassign.mutateAsync(a.id)
-      toast.success('Assignment removed')
+      toast.success('Penugasan dihapus')
     } catch (e) {
-      toast.error(`Failed: ${(e as Error).message}`)
+      toast.error(`Gagal: ${(e as Error).message}`)
     }
   }
 
@@ -71,22 +71,22 @@ export function GroupAssignmentCard({
   function toggleMark(next: CheckStatus) {
     setMark.mutate(
       { groupId: group.id, status: checkStatus === next ? null : next },
-      { onError: (e) => toast.error(`Failed: ${(e as Error).message}`) },
+      { onError: (e) => toast.error(`Gagal: ${(e as Error).message}`) },
     )
   }
 
   async function onDeleteGroup() {
     if (
       !window.confirm(
-        `Delete ${group.name} (${group.cohort?.name ?? ''})? This permanently removes its students, assignments, and attendance records.`,
+        `Hapus ${group.name} (${group.cohort?.name ?? ''})? Ini akan menghapus permanen siswa, penugasan, dan data kehadirannya.`,
       )
     )
       return
     try {
       await deleteGroup.mutateAsync(group.id)
-      toast.success(`${group.name} deleted`)
+      toast.success(`${group.name} dihapus`)
     } catch (e) {
-      toast.error(`Failed: ${(e as Error).message}`)
+      toast.error(`Gagal: ${(e as Error).message}`)
     }
   }
 
@@ -106,8 +106,8 @@ export function GroupAssignmentCard({
               onClick={() => void onDeleteGroup()}
               disabled={deleteGroup.isPending}
               className="text-muted-foreground hover:text-destructive rounded-sm p-1"
-              aria-label={`Delete ${group.name}`}
-              title="Delete group"
+              aria-label={`Hapus ${group.name}`}
+              title="Hapus grup"
             >
               <Trash2 className="size-3.5" />
             </button>
@@ -117,7 +117,7 @@ export function GroupAssignmentCard({
       <CardContent className="flex flex-col gap-3">
         <div className="flex flex-wrap gap-2">
           {groupAssignments.length === 0 ? (
-            <span className="text-muted-foreground text-sm">No volunteers assigned</span>
+            <span className="text-muted-foreground text-sm">Belum ada volunteer ditugaskan</span>
           ) : (
             groupAssignments.map((a) => {
               // 三种来源:补位(coverage_week 非空)→ 浅青;管理员手动指派(source=manual)→ 玫红;
@@ -139,10 +139,10 @@ export function GroupAssignmentCard({
                   className={`gap-1 pr-1${tint}`}
                   title={
                     isCoverage
-                      ? `Covering (week of ${a.coverage_week})`
+                      ? `Coverage (minggu ${a.coverage_week})`
                       : isManual
-                        ? 'Assigned by an admin'
-                        : 'From the roster'
+                        ? 'Ditugaskan oleh admin'
+                        : 'Dari roster'
                   }
                 >
                   {nameOf(a.volunteer_id)}
@@ -151,7 +151,7 @@ export function GroupAssignmentCard({
                     type="button"
                     onClick={() => void onRemove(a)}
                     className="hover:text-destructive rounded-sm"
-                    aria-label={`Remove ${nameOf(a.volunteer_id)}`}
+                    aria-label={`Hapus ${nameOf(a.volunteer_id)}`}
                   >
                     <X className="size-3" />
                   </button>
@@ -164,7 +164,7 @@ export function GroupAssignmentCard({
           <div className="flex items-center gap-2">
             <Select value={selected} onValueChange={setSelected}>
               <SelectTrigger className="w-[220px]">
-                <SelectValue placeholder="Choose someone" />
+                <SelectValue placeholder="Pilih seseorang" />
               </SelectTrigger>
               <SelectContent>
                 {available.map((v) => (
@@ -175,15 +175,15 @@ export function GroupAssignmentCard({
               </SelectContent>
             </Select>
             <Button onClick={() => void onAssign()} disabled={!selected || assign.isPending}>
-              Assign
+              Tugaskan
             </Button>
           </div>
         ) : (
-          <span className="text-muted-foreground text-sm">All volunteers assigned</span>
+          <span className="text-muted-foreground text-sm">Semua volunteer sudah ditugaskan</span>
         )}
 
         <div className="flex flex-wrap items-center gap-2 border-t pt-3">
-          <span className="text-muted-foreground text-xs">This week — original showed up?</span>
+          <span className="text-muted-foreground text-xs">Minggu ini — volunteer asli hadir?</span>
           <Button
             size="sm"
             variant="outline"
@@ -193,7 +193,7 @@ export function GroupAssignmentCard({
             disabled={setMark.isPending}
             onClick={() => toggleMark('present')}
           >
-            Present
+            Hadir
           </Button>
           <Button
             size="sm"
@@ -204,7 +204,7 @@ export function GroupAssignmentCard({
             disabled={setMark.isPending}
             onClick={() => toggleMark('absent')}
           >
-            Absent
+            Tidak hadir
           </Button>
         </div>
       </CardContent>

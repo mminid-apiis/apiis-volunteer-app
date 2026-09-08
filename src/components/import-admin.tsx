@@ -20,8 +20,8 @@ function ResultBox({ result, noun }: { result: ImportResult; noun: string }) {
   return (
     <div className="text-sm">
       <p className="font-medium">
-        {result.ok} {noun} imported/updated
-        {result.errors.length > 0 ? `, ${result.errors.length} note(s)` : ''}.
+        {result.ok} {noun} diimpor/diperbarui
+        {result.errors.length > 0 ? `, ${result.errors.length} catatan` : ''}.
       </p>
       {result.errors.length > 0 && (
         <ul className="text-destructive mt-1 max-h-40 list-disc space-y-0.5 overflow-y-auto pl-5">
@@ -88,7 +88,7 @@ export function ImportStudents() {
   async function run() {
     const { body: rows, get } = mapCsvColumns(parseCsv(csv), { name: 0, class: 1, group: 2, email: 3 })
     if (rows.length === 0) {
-      toast.error('Nothing to import')
+      toast.error('Tidak ada yang bisa diimpor')
       return
     }
     setBusy(true)
@@ -101,16 +101,16 @@ export function ImportStudents() {
       const groupCell = get(row, 'group')
       const email = get(row, 'email').toLowerCase().trim()
       if (!name) {
-        errors.push('(missing name) — row skipped')
+        errors.push('(nama kosong) — baris dilewati')
         continue
       }
       if (!email) {
-        errors.push(`${name}: missing email — row skipped`)
+        errors.push(`${name}: email kosong — baris dilewati`)
         continue
       }
       const gid = resolveGroupId(classes, groups, classCell, groupCell)
       if (!gid) {
-        errors.push(`${name} <${email}>: unknown class/group "${classCell} / ${groupCell}"`)
+        errors.push(`${name} <${email}>: kelas/grup "${classCell} / ${groupCell}" tidak dikenali`)
         continue
       }
       byEmail.set(email, { group_id: gid, full_name: name, email })
@@ -122,7 +122,7 @@ export function ImportStudents() {
       if (error) {
         setBusy(false)
         setResult({ ok: 0, errors: [error.message, ...errors] })
-        toast.error('Import failed')
+        toast.error('Import gagal')
         return
       }
       void qc.invalidateQueries({ queryKey: ['students'] })
@@ -130,28 +130,29 @@ export function ImportStudents() {
     }
     setBusy(false)
     setResult({ ok: toUpsert.length, errors })
-    if (toUpsert.length > 0) toast.success(`Imported / updated ${toUpsert.length} student(s)`)
+    if (toUpsert.length > 0) toast.success(`${toUpsert.length} siswa diimpor/diperbarui`)
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Import students</CardTitle>
+        <CardTitle className="text-base">Import siswa</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <p className="text-muted-foreground text-sm">
-          One row per student: <code>Name, Class, Group, Email</code> (keep a header row — columns are
-          matched by name, so order doesn&apos;t matter). <b>Email is required</b> and is the unique
-          key — re-importing the same email updates that student. Class can be the full name or a
-          unique part (e.g. <code>Pastoral</code>); Group can be <code>Group 5</code> or <code>5</code>.
+          Satu baris per siswa: <code>Name, Class, Group, Email</code> (sertakan baris header — kolom
+          dicocokkan berdasarkan namanya, jadi urutan tidak masalah). <b>Email wajib diisi</b> dan
+          menjadi kunci unik — import ulang dengan email yang sama akan memperbarui data siswa itu.
+          Class boleh nama lengkap atau bagian unik (mis. <code>Pastoral</code>); Group boleh{' '}
+          <code>Group 5</code> atau <code>5</code>.
         </p>
         {classes.length > 0 && (
           <p className="text-muted-foreground text-xs">
-            Classes: {classes.map((c) => c.name).join(' · ')}
+            Kelas: {classes.map((c) => c.name).join(' · ')}
           </p>
         )}
         <div className="flex flex-col gap-1">
-          <Label>Upload a CSV file (or paste below)</Label>
+          <Label>Upload file CSV (atau paste di bawah)</Label>
           <CsvFileInput onText={setCsv} />
         </div>
         <Textarea
@@ -163,10 +164,10 @@ export function ImportStudents() {
         />
         <div className="flex justify-end">
           <Button onClick={() => void run()} disabled={busy || !csv.trim()}>
-            {busy ? 'Importing…' : 'Import students'}
+            {busy ? 'Mengimpor…' : 'Import siswa'}
           </Button>
         </div>
-        {result && <ResultBox result={result} noun="student(s)" />}
+        {result && <ResultBox result={result} noun="siswa" />}
       </CardContent>
     </Card>
   )
@@ -187,7 +188,7 @@ export function ImportVolunteers() {
   async function run() {
     const { body: rows, get } = mapCsvColumns(parseCsv(csv), { name: 0, email: 1, class: 2, group: 3 })
     if (rows.length === 0) {
-      toast.error('Nothing to import')
+      toast.error('Tidak ada yang bisa diimpor')
       return
     }
     setBusy(true)
@@ -203,7 +204,7 @@ export function ImportVolunteers() {
       const classCell = get(row, 'class')
       const groupCell = get(row, 'group')
       if (!email) {
-        errors.push(`${name || '(no name)'}: missing email — skipped`)
+        errors.push(`${name || '(tanpa nama)'}: email kosong — dilewati`)
         continue
       }
       const entry = byEmail.get(email) ?? { name, groupIds: [] }
@@ -214,7 +215,7 @@ export function ImportVolunteers() {
           .map((t) => t.trim())
           .filter(Boolean)) {
           const gid = resolveGroupId(classes, groups, classCell, tok)
-          if (!gid) errors.push(`${name || email}: class/group "${classCell} / ${tok}" not found`)
+          if (!gid) errors.push(`${name || email}: kelas/grup "${classCell} / ${tok}" tidak ditemukan`)
           else if (!entry.groupIds.includes(gid)) entry.groupIds.push(gid)
         }
       }
@@ -246,7 +247,7 @@ export function ImportVolunteers() {
           const { error: aErr } = await supabase
             .from('assignments')
             .upsert(extra, { onConflict: 'group_id,volunteer_id' })
-          if (aErr) errors.push(`${email}: extra groups — ${aErr.message}`)
+          if (aErr) errors.push(`${email}: grup tambahan — ${aErr.message}`)
         }
         // 幂等(按班级):只清理该志愿者「在本次导入涉及的班级内、且不在本次名单里」的旧永久分配。
         // 例如导入他在 Leadership 的组,不会动他在 Pastoral 等其它班级的组;补位(coverage)分配也不受影响。
@@ -269,7 +270,7 @@ export function ImportVolunteers() {
               .eq('volunteer_id', uid as string)
               .is('coverage_week', null)
               .in('group_id', stale)
-            if (dErr) errors.push(`${email}: cleanup old groups — ${dErr.message}`)
+            if (dErr) errors.push(`${email}: bersihkan grup lama — ${dErr.message}`)
           }
         }
       }
@@ -281,27 +282,27 @@ export function ImportVolunteers() {
       void qc.invalidateQueries({ queryKey: ['all-users'] })
       void qc.invalidateQueries({ queryKey: ['volunteer-activity'] })
       void qc.invalidateQueries({ queryKey: ['assignments'] })
-      toast.success(`Imported / updated ${ok} volunteer(s)`)
+      toast.success(`${ok} volunteer diimpor/diperbarui`)
     }
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Import volunteers</CardTitle>
+        <CardTitle className="text-base">Import volunteer</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <p className="text-muted-foreground text-sm">
-          One row per volunteer: <code>Name, Email, Class, Group</code> (keep a header row — columns are
-          matched by name). A volunteer can have <b>several groups</b> in one cell — write{' '}
-          <code>&quot;17,18&quot;</code> (quoted) or <code>17;18</code>. New accounts are created with
-          initial password <code>123456</code>; existing volunteers are only updated (their password
-          isn&apos;t changed). <b>Re-importing updates that volunteer&apos;s groups only for the classes
-          in the file</b> — their groups in other classes are left untouched — so the roster won&apos;t
-          pile up duplicates.
+          Satu baris per volunteer: <code>Name, Email, Class, Group</code> (sertakan baris header —
+          kolom dicocokkan berdasarkan namanya). Satu volunteer bisa punya <b>beberapa grup</b> dalam
+          satu sel — tulis <code>&quot;17,18&quot;</code> (pakai tanda kutip) atau <code>17;18</code>.
+          Akun baru dibuat dengan password awal <code>123456</code>; volunteer yang sudah ada hanya
+          diperbarui datanya (password-nya tidak diubah). <b>Import ulang hanya memperbarui grup
+          volunteer itu untuk kelas yang ada di file</b> — grup mereka di kelas lain tidak diganggu —
+          jadi daftarnya tidak akan menumpuk duplikat.
         </p>
         <div className="flex flex-col gap-1">
-          <Label>Upload a CSV file (or paste below)</Label>
+          <Label>Upload file CSV (atau paste di bawah)</Label>
           <CsvFileInput onText={setCsv} />
         </div>
         <Textarea
@@ -318,10 +319,10 @@ export function ImportVolunteers() {
             </span>
           )}
           <Button onClick={() => void run()} disabled={busy || !csv.trim()}>
-            {busy ? 'Creating…' : 'Import volunteers'}
+            {busy ? 'Memproses…' : 'Import volunteer'}
           </Button>
         </div>
-        {result && <ResultBox result={result} noun="volunteer(s)" />}
+        {result && <ResultBox result={result} noun="volunteer" />}
       </CardContent>
     </Card>
   )

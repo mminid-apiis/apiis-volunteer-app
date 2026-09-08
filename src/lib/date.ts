@@ -12,3 +12,19 @@ export function nextWeekMonday(): string {
   base.setUTCDate(base.getUTCDate() - daysSinceMonday + 7)
   return base.toISOString().slice(0, 10)
 }
+
+const DAY_NAME_ID: Record<string, string> = {
+  monday: 'Senin',
+  tuesday: 'Selasa',
+  wednesday: 'Rabu',
+  thursday: 'Kamis',
+  friday: 'Jumat',
+  saturday: 'Sabtu',
+  sunday: 'Minggu',
+}
+
+/** 把英文星期名(数据库里存的 meeting_day,如 "Monday")转成印尼语显示,认不出就原样返回。 */
+export function dayNameID(en: string | null | undefined): string {
+  if (!en) return ''
+  return DAY_NAME_ID[en.toLowerCase()] ?? en
+}

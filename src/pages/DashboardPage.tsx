@@ -14,19 +14,19 @@ export function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Volunteer Dashboard</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Dashboard Volunteer</h1>
         <p className="text-muted-foreground mt-1 text-sm">
-          Welcome, {profile?.full_name}. Select a group to record attendance.
+          Selamat datang, {profile?.full_name}. Pilih grup untuk mencatat kehadiran.
         </p>
       </div>
 
       {isLoading ? (
-        <p className="text-muted-foreground text-sm">Loading your groups…</p>
+        <p className="text-muted-foreground text-sm">Memuat grup kamu…</p>
       ) : isError ? (
-        <p className="text-destructive text-sm">Couldn’t load your groups. Please refresh and try again.</p>
+        <p className="text-destructive text-sm">Gagal memuat grup kamu. Silakan muat ulang halaman.</p>
       ) : !groups || groups.length === 0 ? (
         <p className="text-muted-foreground text-sm">
-          No groups assigned yet. Please contact your administrator.
+          Belum ada grup yang ditugaskan. Silakan hubungi admin kamu.
         </p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -62,7 +62,7 @@ export function DashboardPage() {
                   <span />
                 )}
                 <Button asChild size="sm">
-                  <Link to={`/groups/${g.id}`}>Record attendance</Link>
+                  <Link to={`/groups/${g.id}`}>Catat kehadiran</Link>
                 </Button>
               </CardContent>
             </Card>

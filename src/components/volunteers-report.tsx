@@ -104,34 +104,34 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
     setExporting(true)
     try {
       const n = await exportVolunteers(rows, 'volunteers.xlsx')
-      toast.success(`Exported ${n} volunteer(s)`)
+      toast.success(`Berhasil ekspor ${n} volunteer`)
     } catch (e) {
-      toast.error(`Export failed: ${(e as Error).message}`)
+      toast.error(`Ekspor gagal: ${(e as Error).message}`)
     } finally {
       setExporting(false)
     }
   }
 
   function onDelete(id: string, name: string) {
-    if (!window.confirm(`Delete "${name}"? This removes their account and assignments.`)) return
+    if (!window.confirm(`Hapus "${name}"? Ini menghapus akun dan penugasannya.`)) return
     del.mutate(id, {
-      onSuccess: () => toast.success('User deleted'),
-      onError: (e) => toast.error(`Failed: ${(e as Error).message}`),
+      onSuccess: () => toast.success('Pengguna dihapus'),
+      onError: (e) => toast.error(`Gagal: ${(e as Error).message}`),
     })
   }
 
   function onSetRole(id: string, name: string, role: 'admin' | 'volunteer') {
     const msg =
       role === 'admin'
-        ? `Make "${name}" an admin? They get full admin access (but not super-admin powers).`
-        : `Change "${name}" back to a volunteer?`
+        ? `Jadikan "${name}" admin? Dia dapat akses admin penuh (tapi bukan wewenang super admin).`
+        : `Ubah "${name}" kembali jadi volunteer?`
     if (!window.confirm(msg)) return
     setRole.mutate(
       { id, role },
       {
         onSuccess: () =>
-          toast.success(role === 'admin' ? `${name} is now an admin` : `${name} is now a volunteer`),
-        onError: (e) => toast.error(`Failed: ${(e as Error).message}`),
+          toast.success(role === 'admin' ? `${name} sekarang admin` : `${name} sekarang volunteer`),
+        onError: (e) => toast.error(`Gagal: ${(e as Error).message}`),
       },
     )
   }
@@ -139,13 +139,13 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
   function onClearAssignments() {
     if (
       !window.confirm(
-        'Clear ALL volunteer → group assignments?\n\nEvery group becomes empty so you can re-import a clean roster without duplicates. This also removes any current coverage claims. Volunteer accounts, students and attendance are NOT affected. This cannot be undone.',
+        'Hapus SEMUA penugasan volunteer → grup?\n\nSetiap grup jadi kosong supaya kamu bisa import ulang daftar bersih tanpa duplikat. Ini juga menghapus klaim coverage yang sedang berjalan. Akun volunteer, siswa, dan data kehadiran TIDAK terpengaruh. Tindakan ini tidak bisa dibatalkan.',
       )
     )
       return
     clearAssignments.mutate(undefined, {
-      onSuccess: (n) => toast.success(`Cleared ${n} assignment(s). Now re-import your roster.`),
-      onError: (e) => toast.error(`Failed: ${(e as Error).message}`),
+      onSuccess: (n) => toast.success(`${n} penugasan dihapus. Sekarang import ulang daftar kamu.`),
+      onError: (e) => toast.error(`Gagal: ${(e as Error).message}`),
     })
   }
 
@@ -155,7 +155,7 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Input
-          placeholder="Search by name or email…"
+          placeholder="Cari nama atau email…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="max-w-xs"
@@ -166,10 +166,10 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
               variant="outline"
               onClick={onClearAssignments}
               disabled={clearAssignments.isPending}
-              title="Remove all group assignments before re-importing a roster"
+              title="Hapus semua penugasan grup sebelum import ulang daftar"
             >
               <Eraser className="size-4" />
-              {clearAssignments.isPending ? 'Clearing…' : 'Clear group assignments'}
+              {clearAssignments.isPending ? 'Menghapus…' : 'Hapus penugasan grup'}
             </Button>
           )}
           {iAmSuper && (
@@ -181,7 +181,7 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
             </Button>
           )}
           <Button variant="outline" onClick={() => void onExport()} disabled={exporting || rows.length === 0}>
-            <Download className="size-4" /> {exporting ? 'Exporting…' : 'Export Excel'}
+            <Download className="size-4" /> {exporting ? 'Mengekspor…' : 'Ekspor Excel'}
           </Button>
         </div>
       </div>
@@ -189,20 +189,20 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
       {iAmSuper && showImport && <ImportVolunteers />}
 
       {rows.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No matching users.</p>
+        <p className="text-muted-foreground text-sm">Tidak ada pengguna yang cocok.</p>
       ) : (
         <div className="overflow-x-auto rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>Nama</TableHead>
                 <TableHead className="whitespace-nowrap">Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Assigned groups</TableHead>
-                <TableHead className="text-center">Sessions attended</TableHead>
-                <TableHead className="whitespace-nowrap">Last active</TableHead>
-                <TableHead className="text-center">Coverage given</TableHead>
-                <TableHead className="text-center">Actions</TableHead>
+                <TableHead>Peran</TableHead>
+                <TableHead>Grup ditugaskan</TableHead>
+                <TableHead className="text-center">Sesi dihadiri</TableHead>
+                <TableHead className="whitespace-nowrap">Terakhir aktif</TableHead>
+                <TableHead className="text-center">Coverage diberikan</TableHead>
+                <TableHead className="text-center">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -251,7 +251,7 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
                     <TableCell className="text-center tabular-nums">{v.coverage_count}</TableCell>
                     <TableCell className="text-center">
                       {isSelf ? (
-                        <span className="text-muted-foreground text-xs">you</span>
+                        <span className="text-muted-foreground text-xs">kamu</span>
                       ) : v.role === 'super_admin' ? (
                         <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
                           <Lock className="size-3" /> super
@@ -266,8 +266,8 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
                                 type="button"
                                 onClick={() => onSetRole(v.volunteer_id, v.full_name, 'admin')}
                                 className="text-muted-foreground hover:text-foreground"
-                                title="Make admin"
-                                aria-label={`Make ${v.full_name} an admin`}
+                                title="Jadikan admin"
+                                aria-label={`Jadikan ${v.full_name} admin`}
                               >
                                 <ShieldCheck className="size-3.5" />
                               </button>
@@ -276,8 +276,8 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
                                 type="button"
                                 onClick={() => onSetRole(v.volunteer_id, v.full_name, 'volunteer')}
                                 className="text-muted-foreground hover:text-foreground"
-                                title="Make volunteer"
-                                aria-label={`Make ${v.full_name} a volunteer`}
+                                title="Jadikan volunteer"
+                                aria-label={`Jadikan ${v.full_name} volunteer`}
                               >
                                 <ShieldOff className="size-3.5" />
                               </button>
@@ -287,8 +287,8 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
                               type="button"
                               onClick={() => onDelete(v.volunteer_id, v.full_name)}
                               className="text-muted-foreground hover:text-destructive"
-                              title="Delete"
-                              aria-label={`Delete ${v.full_name}`}
+                              title="Hapus"
+                              aria-label={`Hapus ${v.full_name}`}
                             >
                               <Trash2 className="size-3.5" />
                             </button>
@@ -305,9 +305,10 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
       )}
 
       <p className="text-muted-foreground text-xs">
-        Admins shown first, then A–Z by name. Only a <b>super admin</b> can import, promote/demote, or delete users —
-        admins manage assignments, attendance &amp; reports; volunteers record attendance. You can&apos;t
-        act on your own row or a super admin.
+        Admin ditampilkan lebih dulu, lalu A–Z berdasarkan nama. Hanya <b>super admin</b> yang bisa
+        import, naik/turunkan jabatan, atau hapus pengguna — admin mengelola penugasan, kehadiran &amp;
+        laporan; volunteer mencatat kehadiran. Kamu tidak bisa bertindak pada baris kamu sendiri atau
+        super admin.
       </p>
     </div>
   )

@@ -43,16 +43,16 @@ function SettingsForm({
           checked={enabled}
           onCheckedChange={(v) => setEnabled(v === true)}
         />
-        <Label htmlFor="reminders">Weekly reminders enabled</Label>
+        <Label htmlFor="reminders">Reminder mingguan aktif</Label>
       </div>
       <div>
         <Button size="sm" disabled={saving} onClick={() => onSave({ reminders_enabled: enabled })}>
-          {saving ? 'Saving…' : 'Save settings'}
+          {saving ? 'Menyimpan…' : 'Simpan pengaturan'}
         </Button>
       </div>
       <p className="text-muted-foreground text-xs">
-        When on, reminders go out only on real class weeks — term breaks are skipped automatically from
-        the course calendar.
+        Saat aktif, reminder hanya dikirim pada minggu kelas yang sungguhan — libur semester otomatis
+        dilewati berdasarkan kalender program.
       </p>
     </div>
   )
@@ -73,8 +73,8 @@ export function SchedulingAdmin() {
 
   function saveSettings(p: SavePatch) {
     updateSettings.mutate(p, {
-      onSuccess: () => toast.success('Settings saved'),
-      onError: (e) => toast.error(`Failed: ${(e as Error).message}`),
+      onSuccess: () => toast.success('Pengaturan disimpan'),
+      onError: (e) => toast.error(`Gagal: ${(e as Error).message}`),
     })
   }
 
@@ -102,28 +102,27 @@ export function SchedulingAdmin() {
           <RefreshCw
             className={`size-4 ${availQ.isFetching || coverQ.isFetching ? 'animate-spin' : ''}`}
           />
-          Refresh
+          Muat ulang
         </Button>
       </div>
       {needsAttention && (
         <Card className="border-amber-400/60 bg-amber-50 dark:bg-amber-950/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base text-amber-700 dark:text-amber-400">
-              <TriangleAlert className="size-4" /> Action needed — week of {week}
+              <TriangleAlert className="size-4" /> Perlu tindakan — minggu {week}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-1.5 text-sm">
             {openCoverage > 0 && (
               <p>
-                <b>{openCoverage}</b> coverage request{openCoverage > 1 ? 's' : ''} still{' '}
-                <b>unclaimed</b> — assign someone in <b>Groups &amp; Assignments</b> if no volunteer
-                claims it.
+                <b>{openCoverage}</b> permintaan coverage masih <b>belum diklaim</b> — tugaskan
+                seseorang di <b>Grup &amp; Penugasan</b> kalau tidak ada volunteer yang mengklaim.
               </p>
             )}
             {noResponse > 0 && (
               <p>
-                <b>{noResponse}</b> volunteer{noResponse > 1 ? 's' : ''} haven&apos;t responded —
-                non-responders don&apos;t trigger a coverage request, so follow up if needed.
+                <b>{noResponse}</b> volunteer belum merespons — yang tidak merespons tidak memicu
+                permintaan coverage, jadi tindak lanjuti kalau perlu.
               </p>
             )}
           </CardContent>
@@ -132,27 +131,28 @@ export function SchedulingAdmin() {
       {allClear && (
         <Card className="border-green-500/40">
           <CardContent className="py-4 text-sm text-green-700 dark:text-green-400">
-            ✓ Nothing to action this week — no unclaimed coverage and everyone has responded.
+            ✓ Tidak ada yang perlu ditindak minggu ini — tidak ada coverage yang belum diklaim dan semua
+            sudah merespons.
           </CardContent>
         </Card>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Reminder settings</CardTitle>
+          <CardTitle className="text-base">Pengaturan reminder</CardTitle>
         </CardHeader>
         <CardContent>
           {settingsQ.data ? (
             <SettingsForm settings={settingsQ.data} onSave={saveSettings} saving={updateSettings.isPending} />
           ) : (
-            <p className="text-muted-foreground text-sm">Loading…</p>
+            <p className="text-muted-foreground text-sm">Memuat…</p>
           )}
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Run now (manual)</CardTitle>
+          <CardTitle className="text-base">Jalankan sekarang (manual)</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           <Button
@@ -162,17 +162,17 @@ export function SchedulingAdmin() {
             onClick={() => {
               if (
                 !window.confirm(
-                  'Run the weekly availability check now? It notifies ALL volunteers in-app (no email is sent).',
+                  'Jalankan pengecekan ketersediaan mingguan sekarang? Ini memberi notifikasi ke SEMUA volunteer di dalam app (tidak ada email yang dikirim).',
                 )
               )
                 return
               runWeekly.mutate(undefined, {
-                onSuccess: (n) => toast.success(`Weekly check done — ${n} volunteer(s) notified`),
-                onError: (e) => toast.error(`Failed: ${(e as Error).message}`),
+                onSuccess: (n) => toast.success(`Pengecekan selesai — ${n} volunteer diberi notifikasi`),
+                onError: (e) => toast.error(`Gagal: ${(e as Error).message}`),
               })
             }}
           >
-            Run weekly availability check
+            Jalankan pengecekan ketersediaan mingguan
           </Button>
           <Button
             variant="outline"
@@ -181,23 +181,23 @@ export function SchedulingAdmin() {
             onClick={() => {
               if (
                 !window.confirm(
-                  'Run the coverage summary now? It creates coverage requests and notifies volunteers in-app (no email is sent).',
+                  'Jalankan ringkasan coverage sekarang? Ini membuat permintaan coverage dan memberi notifikasi ke volunteer di dalam app (tidak ada email yang dikirim).',
                 )
               )
                 return
               runSummarize.mutate(undefined, {
-                onSuccess: (n) => toast.success(`Summary done — ${n} open coverage request(s)`),
-                onError: (e) => toast.error(`Failed: ${(e as Error).message}`),
+                onSuccess: (n) => toast.success(`Ringkasan selesai — ${n} permintaan coverage terbuka`),
+                onError: (e) => toast.error(`Gagal: ${(e as Error).message}`),
               })
             }}
           >
-            Run coverage summary
+            Jalankan ringkasan coverage
           </Button>
           <p className="text-muted-foreground w-full text-xs">
             {isBreak
-              ? `Next week (${week}) is a term break — a run is skipped.`
-              : `Targets the week of ${week}.`}{' '}
-            Normally these run automatically via pg_cron — availability Thu/Fri, coverage Sat/Sun (by curriculum).
+              ? `Minggu depan (${week}) adalah libur semester — proses ini dilewati.`
+              : `Menyasar minggu ${week}.`}{' '}
+            Biasanya ini berjalan otomatis lewat pg_cron — ketersediaan Kamis/Jumat, coverage Sabtu/Minggu (per kurikulum).
           </p>
         </CardContent>
       </Card>
@@ -205,14 +205,14 @@ export function SchedulingAdmin() {
       {isBreak ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Next week</CardTitle>
+            <CardTitle className="text-base">Minggu depan</CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground text-sm">
-            The week of {week} is a term break — no class, so no reminders are sent.
+            Minggu {week} adalah libur semester — tidak ada kelas, jadi tidak ada reminder yang dikirim.
             {nextSession && (
               <>
                 {' '}
-                Reminders resume the week of{' '}
+                Reminder berlanjut lagi pada minggu{' '}
                 <span className="text-foreground font-medium">{nextSession}</span>.
               </>
             )}
@@ -222,22 +222,22 @@ export function SchedulingAdmin() {
         <>
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Availability — week of {week}</CardTitle>
+              <CardTitle className="text-base">Ketersediaan — minggu {week}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-4 text-sm">
-              <span className="text-green-600">Available: {available}</span>
-              <span className="text-destructive">Unavailable: {unavailable}</span>
-              <span className="text-muted-foreground">No response: {noResponse}</span>
+              <span className="text-green-600">Tersedia: {available}</span>
+              <span className="text-destructive">Tidak tersedia: {unavailable}</span>
+              <span className="text-muted-foreground">Belum merespons: {noResponse}</span>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Coverage requests — week of {week}</CardTitle>
+              <CardTitle className="text-base">Permintaan coverage — minggu {week}</CardTitle>
             </CardHeader>
             <CardContent>
               {coverage.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No coverage requests.</p>
+                <p className="text-muted-foreground text-sm">Tidak ada permintaan coverage.</p>
               ) : (
                 <div className="flex flex-col gap-2">
                   {coverage.map((c) => (
@@ -250,10 +250,10 @@ export function SchedulingAdmin() {
                         <span className="text-muted-foreground"> · {c.class_name}</span>
                       </span>
                       {c.status === 'open' ? (
-                        <Badge variant="outline">Open</Badge>
+                        <Badge variant="outline">Terbuka</Badge>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <Badge variant="secondary">Covered by {c.coverer ?? '—'}</Badge>
+                          <Badge variant="secondary">Dicover oleh {c.coverer ?? '—'}</Badge>
                           <Button
                             size="sm"
                             variant="outline"
@@ -261,17 +261,17 @@ export function SchedulingAdmin() {
                             onClick={() => {
                               if (
                                 !window.confirm(
-                                  `Re-open coverage for ${c.group_name} (${c.class_name})? This releases ${c.coverer ?? 'the coverer'} so someone else can claim it.`,
+                                  `Buka kembali coverage untuk ${c.group_name} (${c.class_name})? Ini melepas ${c.coverer ?? 'orang yang mengcover'} supaya bisa diklaim orang lain.`,
                                 )
                               )
                                 return
                               reopen.mutate(c.id, {
-                                onSuccess: () => toast.success('Coverage re-opened'),
-                                onError: (e) => toast.error(`Failed: ${(e as Error).message}`),
+                                onSuccess: () => toast.success('Coverage dibuka kembali'),
+                                onError: (e) => toast.error(`Gagal: ${(e as Error).message}`),
                               })
                             }}
                           >
-                            Re-open
+                            Buka kembali
                           </Button>
                         </div>
                       )}
