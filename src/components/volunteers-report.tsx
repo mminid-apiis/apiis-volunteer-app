@@ -11,6 +11,7 @@ import {
   useVolunteerActivity,
 } from '@/hooks/use-assignments'
 import { useAllGroups } from '@/hooks/use-groups'
+import { cohortAccent } from '@/lib/cohort-accent'
 import { ImportVolunteers } from '@/components/import-admin'
 import { Spinner } from '@/components/spinner'
 import { Badge } from '@/components/ui/badge'
@@ -74,10 +75,11 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
     )
   }, [data, assignmentsQ.data, groupsQ.data, classFilter, query])
 
-  // 每个志愿者的具体组名(客户端用 assignments + groups 拼出),带简短班级码,如 "6P · Group 1"
+  // 每个志愿者的具体组名(客户端用 assignments + groups 拼出),带简短班级码,如 "2P · Group 1",
+  // 并带上按班级区分的配色,方便一眼看出同一志愿者跨了哪些班级。
   const groupsByVolunteer = useMemo(() => {
     const groupById = new Map((groupsQ.data ?? []).map((g) => [g.id, g]))
-    const map = new Map<string, { id: string; label: string; title: string }[]>()
+    const map = new Map<string, { id: string; label: string; title: string; badgeClass: string }[]>()
     for (const a of assignmentsQ.data ?? []) {
       const g = groupById.get(a.group_id)
       if (!g) continue
@@ -89,6 +91,7 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
         id: a.id,
         label: short ? `${short} · ${g.name}` : g.name,
         title: cls ? `${cls} · ${g.name}` : g.name,
+        badgeClass: cohortAccent(cls).badge,
       })
       map.set(a.volunteer_id, arr)
     }
@@ -231,7 +234,12 @@ export function VolunteersReport({ classFilter }: { classFilter: string }) {
                       ) : (
                         <div className="flex max-w-xs flex-wrap gap-1">
                           {vGroups.map((g) => (
-                            <Badge key={g.id} variant="outline" className="font-normal" title={g.title}>
+                            <Badge
+                              key={g.id}
+                              variant="outline"
+                              className={`font-normal ${g.badgeClass}`}
+                              title={g.title}
+                            >
                               {g.label}
                             </Badge>
                           ))}

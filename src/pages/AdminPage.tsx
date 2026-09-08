@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Check, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAllGroups, useClasses, useCreateGroup, type GroupWithCohort } from '@/hooks/use-groups'
 import { useAssignments, useAllUsers, useGroupCheckMarks } from '@/hooks/use-assignments'
+import { cohortAccent, groupByCohort } from '@/lib/cohort-accent'
 import { GroupAssignmentCard } from '@/components/group-assignment-card'
 import { StudentsReport } from '@/components/students-report'
 import { SchedulingAdmin } from '@/components/scheduling-admin'
@@ -35,23 +36,6 @@ function groupCode(g: { name: string; cohort: { name: string } | null }): string
   const sec = parts.length > 1 ? `${parts[0]}${parts[1][0]}` : parts[0] || cls
   const num = g.name.replace(/^group\s*/i, '')
   return `${sec}-G${num}`
-}
-
-// 按班级区分的配色（表头条 + 卡片左侧强调色），未来新增班级落到灰色兜底。
-const COHORT_ACCENTS = [
-  { match: /MMin\s*2.*Leadership/i, bar: 'bg-blue-600', bg: 'bg-blue-50', text: 'text-blue-900', border: 'border-blue-200' },
-  { match: /MMin\s*2.*Pastoral/i, bar: 'bg-emerald-600', bg: 'bg-emerald-50', text: 'text-emerald-900', border: 'border-emerald-200' },
-  { match: /MMin\s*3.*Leadership/i, bar: 'bg-purple-600', bg: 'bg-purple-50', text: 'text-purple-900', border: 'border-purple-200' },
-  { match: /MMin\s*3.*Pastoral/i, bar: 'bg-amber-600', bg: 'bg-amber-50', text: 'text-amber-900', border: 'border-amber-200' },
-] as const
-const FALLBACK_ACCENT = {
-  bar: 'bg-slate-500',
-  bg: 'bg-slate-50',
-  text: 'text-slate-900',
-  border: 'border-slate-200',
-}
-function cohortAccent(cohortName: string) {
-  return COHORT_ACCENTS.find((a) => a.match.test(cohortName)) ?? FALLBACK_ACCENT
 }
 
 function AddGroupButton({
@@ -86,6 +70,32 @@ function AddGroupButton({
     <Button size="sm" variant="outline" onClick={() => void onAdd()} disabled={create.isPending}>
       <Plus className="size-4" /> Add group
     </Button>
+  )
+}
+
+// 分区表头：色条 + 班级名 + 数量,可选带右侧操作按钮(如 Add group)。
+function CohortSectionHeader({
+  cohortName,
+  count,
+  noun,
+  action,
+}: {
+  cohortName: string
+  count: number
+  noun: string
+  action?: ReactNode
+}) {
+  const accent = cohortAccent(cohortName)
+  return (
+    <div className={`flex items-center gap-2 rounded-md border ${accent.border} ${accent.bg} px-3 py-2`}>
+      <span className={`h-4 w-1.5 rounded-full ${accent.bar}`} aria-hidden />
+      <h3 className={`text-sm font-semibold ${accent.text}`}>{cohortName}</h3>
+      <span className="text-muted-foreground text-xs">
+        {count} {noun}
+        {count === 1 ? '' : 's'}
+      </span>
+      {action && <span className="ml-auto">{action}</span>}
+    </div>
   )
 }
 
@@ -125,17 +135,7 @@ function AssignmentsTab({ classFilter }: { classFilter: string }) {
     return <p className="text-muted-foreground text-sm">No groups.</p>
   }
 
-  // groups 已按 cohort 名称 → 组号排好序(见 useAllGroups),这里按相邻 cohort_id 分段,
-  // 保留原有顺序,不必再排序一次。
-  const sections: { cohortId: string; cohortName: string; groups: typeof groups }[] = []
-  for (const g of groups) {
-    const last = sections[sections.length - 1]
-    if (last && last.cohortId === g.cohort_id) {
-      last.groups.push(g)
-    } else {
-      sections.push({ cohortId: g.cohort_id, cohortName: g.cohort?.name ?? 'Unassigned', groups: [g] })
-    }
-  }
+  const sections = groupByCohort(groups)
 
   return (
     <div className="flex flex-col gap-5">
@@ -154,37 +154,28 @@ function AssignmentsTab({ classFilter }: { classFilter: string }) {
         “Present / Absent” is a temporary note for tracking whether the original volunteer showed up —
         it isn’t saved to attendance and is cleared every Wednesday.
       </p>
-      {sections.map((section) => {
-        const accent = cohortAccent(section.cohortName)
-        return (
-          <div key={section.cohortId} className="flex flex-col gap-3">
-            <div
-              className={`flex items-center gap-2 rounded-md border ${accent.border} ${accent.bg} px-3 py-2`}
-            >
-              <span className={`h-4 w-1.5 rounded-full ${accent.bar}`} aria-hidden />
-              <h3 className={`text-sm font-semibold ${accent.text}`}>{section.cohortName}</h3>
-              <span className="text-muted-foreground text-xs">
-                {section.groups.length} group{section.groups.length === 1 ? '' : 's'}
-              </span>
-              <span className="ml-auto">
-                <AddGroupButton cohortId={section.cohortId} existingGroups={section.groups} />
-              </span>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              {section.groups.map((g) => (
-                <GroupAssignmentCard
-                  key={g.id}
-                  group={g}
-                  users={users}
-                  assignments={assignments}
-                  checkStatus={marksByGroup.get(g.id) ?? null}
-                  originals={originalByVolunteer}
-                />
-              ))}
-            </div>
+      {sections.map((section) => (
+        <div key={section.cohortId} className="flex flex-col gap-3">
+          <CohortSectionHeader
+            cohortName={section.cohortName}
+            count={section.items.length}
+            noun="group"
+            action={<AddGroupButton cohortId={section.cohortId} existingGroups={section.items} />}
+          />
+          <div className="grid gap-4 md:grid-cols-2">
+            {section.items.map((g) => (
+              <GroupAssignmentCard
+                key={g.id}
+                group={g}
+                users={users}
+                assignments={assignments}
+                checkStatus={marksByGroup.get(g.id) ?? null}
+                originals={originalByVolunteer}
+              />
+            ))}
           </div>
-        )
-      })}
+        </div>
+      ))}
     </div>
   )
 }
@@ -195,21 +186,32 @@ function RecordsTab({ classFilter }: { classFilter: string }) {
   const groups = (groupsQ.data ?? []).filter(
     (g) => classFilter === 'all' || g.cohort_id === classFilter,
   )
+  const sections = groupByCohort(groups)
+
+  if (groups.length === 0) {
+    return <p className="text-muted-foreground text-sm">No groups.</p>
+  }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {groups.map((g) => (
-        <Card key={g.id}>
-          <CardHeader>
-            <CardTitle className="text-base">{g.name}</CardTitle>
-            {g.cohort?.name && <p className="text-muted-foreground text-xs">{g.cohort.name}</p>}
-          </CardHeader>
-          <CardContent>
-            <Button asChild size="sm" variant="secondary">
-              <Link to={`/groups/${g.id}`}>Open attendance</Link>
-            </Button>
-          </CardContent>
-        </Card>
+    <div className="flex flex-col gap-5">
+      {sections.map((section) => (
+        <div key={section.cohortId} className="flex flex-col gap-3">
+          <CohortSectionHeader cohortName={section.cohortName} count={section.items.length} noun="group" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {section.items.map((g) => (
+              <Card key={g.id}>
+                <CardHeader>
+                  <CardTitle className="text-base">{g.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild size="sm" variant="secondary">
+                    <Link to={`/groups/${g.id}`}>Open attendance</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   )

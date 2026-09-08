@@ -3,10 +3,11 @@ import { Download, Trash2, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/lib/auth'
 import { useAttendanceReport } from '@/hooks/use-attendance'
-import { useDeleteStudent } from '@/hooks/use-groups'
+import { useClasses, useDeleteStudent } from '@/hooks/use-groups'
 import { exportStudentMatrix } from '@/lib/report'
 import type { ReportCell } from '@/lib/report'
 import { curriculumForClass, weekForDate } from '@/lib/calendar'
+import { cohortAccent } from '@/lib/cohort-accent'
 import { ImportStudents } from '@/components/import-admin'
 import { Spinner } from '@/components/spinner'
 import { Button } from '@/components/ui/button'
@@ -37,6 +38,9 @@ export function StudentsReport({ classFilter }: { classFilter: string }) {
   const report = reportQ.data
   const { profile } = useAuth()
   const iAmSuper = profile?.role === 'super_admin'
+  const classesQ = useClasses()
+  const className = classesQ.data?.find((c) => c.id === classFilter)?.name ?? null
+  const accent = cohortAccent(className)
 
   // 搜索(姓名/邮箱/班级/组)+ 按姓名 a→z
   const visibleStudents = useMemo(() => {
@@ -110,6 +114,14 @@ export function StudentsReport({ classFilter }: { classFilter: string }) {
 
   return (
     <div className="flex flex-col gap-4">
+      {!isAll && className && (
+        <div
+          className={`flex items-center gap-2 rounded-md border ${accent.border} ${accent.bg} px-3 py-2`}
+        >
+          <span className={`h-4 w-1.5 rounded-full ${accent.bar}`} aria-hidden />
+          <h3 className={`text-sm font-semibold ${accent.text}`}>{className}</h3>
+        </div>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-2">
         {isAll ? (
           <p className="text-muted-foreground text-sm">Select a class above to view attendance and export.</p>
