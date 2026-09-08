@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X } from 'lucide-react'
+import { Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   useAssignVolunteer,
@@ -7,7 +7,7 @@ import {
   useUnassign,
   type CheckStatus,
 } from '@/hooks/use-assignments'
-import type { GroupWithCohort } from '@/hooks/use-groups'
+import { useDeleteGroup, type GroupWithCohort } from '@/hooks/use-groups'
 import type { Assignment, Profile } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -38,6 +38,7 @@ export function GroupAssignmentCard({
   const assign = useAssignVolunteer()
   const unassign = useUnassign()
   const setMark = useSetGroupCheckMark()
+  const deleteGroup = useDeleteGroup()
   const [selected, setSelected] = useState('')
 
   const groupAssignments = assignments.filter((a) => a.group_id === group.id)
@@ -74,16 +75,43 @@ export function GroupAssignmentCard({
     )
   }
 
+  async function onDeleteGroup() {
+    if (
+      !window.confirm(
+        `Delete ${group.name} (${group.cohort?.name ?? ''})? This permanently removes its students, assignments, and attendance records.`,
+      )
+    )
+      return
+    try {
+      await deleteGroup.mutateAsync(group.id)
+      toast.success(`${group.name} deleted`)
+    } catch (e) {
+      toast.error(`Failed: ${(e as Error).message}`)
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between gap-2 text-base">
           <span>{group.name}</span>
-          {group.cohort?.name && (
-            <Badge variant="outline" className="shrink-0 font-normal">
-              {group.cohort.name}
-            </Badge>
-          )}
+          <span className="flex shrink-0 items-center gap-1">
+            {group.cohort?.name && (
+              <Badge variant="outline" className="font-normal">
+                {group.cohort.name}
+              </Badge>
+            )}
+            <button
+              type="button"
+              onClick={() => void onDeleteGroup()}
+              disabled={deleteGroup.isPending}
+              className="text-muted-foreground hover:text-destructive rounded-sm p-1"
+              aria-label={`Delete ${group.name}`}
+              title="Delete group"
+            >
+              <Trash2 className="size-3.5" />
+            </button>
+          </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">

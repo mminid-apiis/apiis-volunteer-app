@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Check, Trash2 } from 'lucide-react'
+import { Check, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAllGroups, useClasses } from '@/hooks/use-groups'
+import { useAllGroups, useClasses, useCreateGroup, type GroupWithCohort } from '@/hooks/use-groups'
 import { useAssignments, useAllUsers, useGroupCheckMarks } from '@/hooks/use-assignments'
 import { GroupAssignmentCard } from '@/components/group-assignment-card'
 import { StudentsReport } from '@/components/students-report'
@@ -52,6 +52,41 @@ const FALLBACK_ACCENT = {
 }
 function cohortAccent(cohortName: string) {
   return COHORT_ACCENTS.find((a) => a.match.test(cohortName)) ?? FALLBACK_ACCENT
+}
+
+function AddGroupButton({
+  cohortId,
+  existingGroups,
+}: {
+  cohortId: string
+  existingGroups: GroupWithCohort[]
+}) {
+  const create = useCreateGroup()
+
+  async function onAdd() {
+    let max = 0
+    for (const g of existingGroups) {
+      const n = Number(g.name.replace(/^group\s*/i, ''))
+      if (!Number.isNaN(n) && n > max) max = n
+    }
+    const name = `Group ${max + 1}`
+    try {
+      await create.mutateAsync({
+        cohortId,
+        name,
+        meetingDay: existingGroups[0]?.meeting_day ?? null,
+      })
+      toast.success(`${name} added`)
+    } catch (e) {
+      toast.error(`Failed: ${(e as Error).message}`)
+    }
+  }
+
+  return (
+    <Button size="sm" variant="outline" onClick={() => void onAdd()} disabled={create.isPending}>
+      <Plus className="size-4" /> Add group
+    </Button>
+  )
 }
 
 function AssignmentsTab({ classFilter }: { classFilter: string }) {
@@ -130,6 +165,9 @@ function AssignmentsTab({ classFilter }: { classFilter: string }) {
               <h3 className={`text-sm font-semibold ${accent.text}`}>{section.cohortName}</h3>
               <span className="text-muted-foreground text-xs">
                 {section.groups.length} group{section.groups.length === 1 ? '' : 's'}
+              </span>
+              <span className="ml-auto">
+                <AddGroupButton cohortId={section.cohortId} existingGroups={section.groups} />
               </span>
             </div>
             <div className="grid gap-4 md:grid-cols-2">

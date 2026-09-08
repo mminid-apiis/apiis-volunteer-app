@@ -122,3 +122,33 @@ export function useDeleteStudent() {
     },
   })
 }
+
+/** 新增小组（管理员；RLS 允许）。 */
+export function useCreateGroup() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: { cohortId: string; name: string; meetingDay: string | null }) => {
+      const { error } = await supabase
+        .from('groups')
+        .insert({ cohort_id: input.cohortId, name: input.name, meeting_day: input.meetingDay })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['all-groups'] })
+    },
+  })
+}
+
+/** 删除小组（管理员；RLS 允许）。级联删除其学员/分配/出勤/补位/打卡记录。 */
+export function useDeleteGroup() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('groups').delete().eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['all-groups'] })
+    },
+  })
+}
