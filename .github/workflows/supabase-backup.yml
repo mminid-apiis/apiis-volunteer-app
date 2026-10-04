@@ -1,0 +1,84 @@
+# Weekly encrypted backup of the Supabase data (public schema + login accounts).
+#
+# The repo is PUBLIC, and the dump contains names/emails and password hashes, so the file
+# is encrypted (AES-256, symmetric GPG) before it is uploaded as a workflow artifact.
+# Without BACKUP_PASSPHRASE the backup is unreadable — keep that passphrase in a password
+# manager, NOT only in GitHub.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   SUPABASE_DB_URL     Session-pooler URI (Supabase -> Connect -> Session pooler), with the
+#                       real database password filled in (URL-encode special characters).
+#                       The direct connection is IPv6-only and GitHub runners are IPv4.
+#   BACKUP_PASSPHRASE   Long random passphrase used to encrypt the dump.
+#
+# Artifacts are kept 90 days (GitHub's maximum) -> about 12 weekly copies.
+#
+# Restore (rehearse once on a throwaway project):
+#   1. Download the artifact, then: gpg --decrypt supabase-backup-YYYY-MM-DD.sql.gpg > backup.sql
+#   2. New project: run supabase/_apply_all.sql (schema + seed), then empty the seeded tables
+#      (TRUNCATE public.cohorts CASCADE; TRUNCATE public.class_sessions; TRUNCATE public.app_settings)
+#      so the backup rows don't collide with the seed.
+#   3. PGOPTIONS='-c session_replication_role=replica' psql "$NEW_DB_URL" -f backup.sql
+#      (replica mode skips triggers, e.g. the one that auto-creates a profile per auth user)
+#   Not included: Vault secrets (Resend key, app_url) — re-run supabase/email_setup.sql.
+name: Supabase backup
+
+on:
+  schedule:
+    - cron: '0 20 * * 0' # Sunday 20:00 UTC = Monday 03:00 WIB
+  workflow_dispatch: {} # manual run from the Actions tab
+
+permissions: {}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+    steps:
+      - name: Check secrets are configured
+        shell: bash
+        run: |
+          missing=0
+          [ -n "$SUPABASE_DB_URL" ] || { echo "::error::Secret SUPABASE_DB_URL is not set"; missing=1; }
+          [ -n "$BACKUP_PASSPHRASE" ] || { echo "::error::Secret BACKUP_PASSPHRASE is not set"; missing=1; }
+          exit $missing
+
+      - name: Install PostgreSQL 17 client
+        shell: bash
+        run: |
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-17
+          pg_dump --version
+
+      - name: Dump data
+        shell: bash
+        run: |
+          pg_dump "$SUPABASE_DB_URL" \
+            --data-only --no-owner --no-privileges \
+            --table='public.*' --table=auth.users --table=auth.identities \
+            --file=backup.sql
+          # Guard against an empty/partial dump being uploaded as a "good" backup.
+          grep -q '^COPY public.cohorts ' backup.sql
+          grep -q '^COPY auth.users ' backup.sql
+          echo "Dump size: $(wc -c < backup.sql) bytes"
+
+      - name: Encrypt dump
+        shell: bash
+        run: |
+          out="supabase-backup-$(date -u +%F).sql.gpg"
+          printf '%s' "$BACKUP_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback \
+            --passphrase-fd 0 --symmetric --cipher-algo AES256 --output "$out" backup.sql
+          rm -f backup.sql
+          echo "BACKUP_FILE=$out" >> "$GITHUB_ENV"
+
+      - name: Upload encrypted backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BACKUP_FILE }}
+          path: ${{ env.BACKUP_FILE }}
+          retention-days: 90
+          if-no-files-found: error
