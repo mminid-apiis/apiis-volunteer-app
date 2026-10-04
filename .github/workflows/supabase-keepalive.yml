@@ -1,0 +1,32 @@
+# Keeps the free-tier Supabase project from auto-pausing after ~1 week of inactivity.
+# Sends a tiny read query to the project's REST API twice a week. If the project is
+# already paused/unreachable the job fails, so GitHub emails the repo owner.
+#
+# URL and publishable key are the same public, browser-side values already shipped in
+# the deployed app (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY) — not secrets. If the
+# Supabase project is ever recreated, update both values below.
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: '0 3 * * 1,4' # Mon + Thu, 03:00 UTC (10:00 WIB)
+  workflow_dispatch: {} # manual run from the Actions tab
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SUPABASE_URL: https://lztubuycrydjztcjvaiq.supabase.co
+      SUPABASE_PUBLISHABLE_KEY: sb_publishable_rVvITjlkzMDotowpyTM_cg_m-aAapjG
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --retry 3 --retry-delay 10 --max-time 30 \
+            -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
+            "${SUPABASE_URL}/rest/v1/cohorts?select=id&limit=1"
+          echo
+          echo "Supabase project is reachable."
